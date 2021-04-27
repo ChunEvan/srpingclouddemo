@@ -1,0 +1,49 @@
+server:
+  port: 10010
+
+spring:
+  application:
+    name: api-gatewawy
+  cloud:
+    gateway:
+      routes:
+        - id: user-service-route
+          uri: lb://user-service
+          predicates:
+#            - Path=/**
+            - Path=/api/user/**
+          filters:
+#            - PrefixPath=/user
+            - StripPrefix=1
+            - MyParam=name
+      default-filters:
+        - AddResponseHeader=X-Response-Foo, Bar
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            #allowedOrigins: * # 这种写法或者下面的都可以，*表示全部
+            allowedOrigins:
+              - "http://docs.spring.io"
+            allowedMethods:
+              - GET
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:10086/eureka
+  instance:
+    hostname: 127.0.0.1
+    prefer-ip-address: true
+
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 6000
+ribbon:
+  ConnectTimeout: 1000
+  ReadTimeout: 2000
+  MaxAutoRetries: 0
+  MaxAutoRetriesNextServer: 0
+
